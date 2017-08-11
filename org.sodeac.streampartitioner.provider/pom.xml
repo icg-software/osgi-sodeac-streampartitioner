@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>org.sodeac.streampartitioner.provider</artifactId>
+  <version>1.0.0</version>
+  <packaging>bundle</packaging>
+  <name>Sodeac StreamPartitioner Provider</name>
+  <description>Sodeac StreamPartitioner Provider as OSGi MicroService</description>
+  <parent>
+    <groupId>org.sodeac</groupId>
+    <artifactId>sodeac-parent</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>org.sodeac</groupId>
+      <artifactId>org.sodeac.streampartitioner.api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <version>3.3.0</version>
+        <configuration>
+          <instructions>
+          	<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Version>${project.version}</Bundle-Version>
+            <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+            <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
+            <Import-Package>
+            	org.sodeac.streampartitioner.api;version="[1.0.0,1.0.0]",
+            	*
+            </Import-Package>
+            <Private-Package>org.sodeac.streampartitioner.impl</Private-Package>
+          </instructions>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <developers>
+    <developer>
+      <id>sebastian.palarus</id>
+      <name>Sebastian Palarus</name>
+    </developer>
+  </developers>
+  <url>https://github.com/spalarus/sodeac</url>
+</project>
