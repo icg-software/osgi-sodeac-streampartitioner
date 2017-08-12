@@ -86,7 +86,7 @@ public class StreamPartitionerConsumerTest
 	@Test
 	public void testProduceConsumeAndCompare() throws IOException, NoSuchAlgorithmException
 	{
-		System.out.println("\t\tRun Consumer Test:  " + maxTransferLength);
+		System.out.println("[INFO]\t\tRun Consumer Test:  " + maxTransferLength);
 		File testStreamFile = null;
 		OutputStream testOutputStream = null;
 		InputStream testInputStream = null;

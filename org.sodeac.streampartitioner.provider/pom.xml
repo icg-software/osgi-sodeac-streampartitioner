@@ -1,13 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.sodeac.streampartitioner.provider</artifactId>
-  <version>1.0.0</version>
   <packaging>bundle</packaging>
   <name>Sodeac StreamPartitioner Provider</name>
   <description>Sodeac StreamPartitioner Provider as OSGi MicroService</description>
   <parent>
     <groupId>org.sodeac</groupId>
-    <artifactId>sodeac-parent</artifactId>
+    <artifactId>sodeac-streampartitioner-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
@@ -49,5 +48,5 @@
       <name>Sebastian Palarus</name>
     </developer>
   </developers>
-  <url>https://github.com/spalarus/sodeac</url>
+  <url>https://github.com/spalarus/osgi-sodeac-streampartitioner</url>
 </project>

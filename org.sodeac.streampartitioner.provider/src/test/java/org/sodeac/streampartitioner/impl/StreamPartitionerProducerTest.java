@@ -88,7 +88,7 @@ public class StreamPartitionerProducerTest
 	@Test
 	public void testProduceConsumeAndCompare() throws IOException, NoSuchAlgorithmException
 	{
-		System.out.println("\t\tRun Producer Test: " + maxTransferLength);
+		System.out.println("[INFO]\t\tRun Producer Test: " + maxTransferLength);
 		File testStreamFile = null;
 		OutputStream testOutputStream = null;
 		InputStream testInputStream = null;
