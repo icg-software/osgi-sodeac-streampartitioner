@@ -17,12 +17,12 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.bundle;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
+//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureConsole;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
+//import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.options.ProvisionOption;
@@ -130,8 +130,9 @@ public abstract class AbstractTest
 			logLevel(LogLevel.INFO),
 			features(karafStandardRepo , "scr"),
 			mavenBundle("org.easymock", "easymock", "3.4").start(),
-			reactorBundle("org.sodeac.streampartitioner.api","1.0.0").start(),		// TODO Version
-			reactorBundle("org.sodeac.streampartitioner.provider","1.0.0").start()	// TODO Version
+			reactorBundle("org.sodeac.streampartitioner.api","1.0.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.provider","1.0.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.example","1.0.0").start()
 		};
 	}
 }

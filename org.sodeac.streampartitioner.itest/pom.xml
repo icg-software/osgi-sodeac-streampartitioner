@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.sodeac.streampartitioner.itest</artifactId>
-  <name>streampartitioner itest</name>
-  <description>OSGi container integrations tests for streampartitioner</description>
+  <name>Sodeac StreamPartitioner Integration Test</name>
+  <description>OSGi-Container integrations tests for streampartitioner bundles</description>
   <parent>
     <groupId>org.sodeac</groupId>
     <artifactId>sodeac-streampartitioner-parent</artifactId>
@@ -17,35 +17,10 @@
     </dependency>
     <dependency>
       <groupId>org.sodeac</groupId>
-      <artifactId>org.sodeac.streampartitioner.provider</artifactId>
+      <artifactId>org.sodeac.streampartitioner.example</artifactId>
       <version>1.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <version>3.3.0</version>
-        <configuration>
-          <instructions>
-          	<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Bundle-Version>${project.version}</Bundle-Version>
-            <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
-            <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-            <Import-Package>
-            	org.sodeac.streampartitioner.api;version="[1.0.0.SNAPSHOT,1.0.0.SNAPSHOT]",
-            	*
-            </Import-Package>
-            <Private-Package>org.sodeac.streampartitioner.impl</Private-Package>
-          </instructions>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <developers>
     <developer>
       <id>sebastian.palarus</id>

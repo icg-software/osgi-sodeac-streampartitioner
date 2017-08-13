@@ -102,6 +102,7 @@
   <modules>
     <module>org.sodeac.streampartitioner.api</module>
     <module>org.sodeac.streampartitioner.provider</module>
+    <module>org.sodeac.streampartitioner.example</module>
     <module>org.sodeac.streampartitioner.itest</module>
   </modules>
 

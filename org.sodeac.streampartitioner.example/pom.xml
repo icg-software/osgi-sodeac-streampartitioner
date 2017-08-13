@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>org.sodeac.streampartitioner.provider</artifactId>
+  <artifactId>org.sodeac.streampartitioner.example</artifactId>
+  <name>Sodeac Streampartitioner Example</name>
   <packaging>bundle</packaging>
-  <name>Sodeac StreamPartitioner Provider</name>
-  <description>Sodeac streampartitioner provider for OSGi μservice.</description>
+  <description>example echo server for streampartitioner</description>
   <parent>
     <groupId>org.sodeac</groupId>
     <artifactId>sodeac-streampartitioner-parent</artifactId>
@@ -34,7 +34,8 @@
             	org.sodeac.streampartitioner.api;version="[1.0.0.SNAPSHOT,1.0.0.SNAPSHOT]",
             	*
             </Import-Package>
-            <Private-Package>org.sodeac.streampartitioner.impl</Private-Package>
+            <Export-Package>org.sodeac.streampartitioner.example.api;version="${project.version}"</Export-Package>
+            <Private-Package>org.sodeac.streampartitioner.example.impl</Private-Package>
           </instructions>
           <source>1.8</source>
           <target>1.8</target>
