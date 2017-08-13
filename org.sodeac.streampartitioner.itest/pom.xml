@@ -21,11 +21,4 @@
       <version>1.0.0</version>
     </dependency>
   </dependencies>
-  <developers>
-    <developer>
-      <id>sebastian.palarus</id>
-      <name>Sebastian Palarus</name>
-    </developer>
-  </developers>
-  <url>https://github.com/spalarus/osgi-sodeac-streampartitioner</url>
 </project>

@@ -33,11 +33,4 @@ A streampartitioner splits InputStreams and OutputStreams (java.io) into substre
       </plugin>
     </plugins>
   </build>
-  <developers>
-    <developer>
-      <id>sebastian.palarus</id>
-      <name>Sebastian Palarus</name>
-    </developer>
-  </developers>
-  <url>https://github.com/spalarus/osgi-sodeac-streampartitioner</url>
 </project>

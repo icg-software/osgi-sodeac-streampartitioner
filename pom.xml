@@ -98,6 +98,27 @@
       </plugin>
       </plugins>
   </build>
+  
+  <licenses>
+	<license>
+	  <name>Eclipse Public License v1.0</name>
+	  <url>http://www.eclipse.org/legal/epl-v10.html</url>
+	</license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <id>sebastian.palarus</id>
+      <name>Sebastian Palarus</name>
+    </developer>
+  </developers>
+  
+  <scm>
+	<connection>scm:git:https://github.com/spalarus/osgi-sodeac-streampartitioner.git</connection>
+	<url>https://github.com/spalarus/osgi-sodeac-streampartitioner.git</url>
+  </scm>
+  
+  <url>https://github.com/spalarus/osgi-sodeac-streampartitioner</url>
 
   <modules>
     <module>org.sodeac.streampartitioner.api</module>
