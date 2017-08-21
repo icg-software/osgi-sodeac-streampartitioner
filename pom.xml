@@ -4,8 +4,9 @@
   <artifactId>sodeac-streampartitioner-parent</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <name>sodeac-streampartitioner-parent</name>
-
+  <name>Sodeac StreamPartitioner Parent</name>
+  <description>Parent pom for Sodeac StreamPartitioner modules</description>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jdk.version>1.8</jdk.version>
