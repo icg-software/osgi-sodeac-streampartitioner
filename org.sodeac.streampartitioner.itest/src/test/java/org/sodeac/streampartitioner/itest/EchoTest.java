@@ -39,6 +39,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.crypto.NoSuchPaddingException;
 import javax.inject.Inject;
@@ -97,6 +98,9 @@ public class EchoTest extends AbstractTest
 		assertNotNull("bundleContext should not be null" ,bundleContext);
 		assertNotNull("EventAdmin should not be null" ,eventAdmin);
 		assertNotNull("EchoClientFactory should not be null" ,echoClientFactory);
+		
+		AtomicLong publishSize = new AtomicLong();
+		AtomicLong consumeSize = new AtomicLong();
 		
 		
 		IEchoClient echoClient = null;
@@ -159,6 +163,7 @@ public class EchoTest extends AbstractTest
 					
 					// write into substream
 					echoClient.writeInSubStream(buffer);
+					publishSize.addAndGet(buffer.length);
 				}
 				
 				// close substream
@@ -185,6 +190,7 @@ public class EchoTest extends AbstractTest
 				SubStreamFingerprint  subInputStreamFingerprint = subInputStreamFingerprintList.get(j);
 				SubStreamFingerprint  subOutputStreamFingerprint = subOutputStreamFingerprintList.get(j);
 				
+				consumeSize.addAndGet(subInputStreamFingerprint.getSize());
 				System.out.println("[INFO]\t\tTest substream (" + j + "/" + ( subInputStreamFingerprintList.size() - 1) + ") length: " + subInputStreamFingerprint.getSize() + " md5: " + subInputStreamFingerprint.getMD5());
 				
 				assertEquals("number of fingerprint should equals to position of fingerprintlist (input " + j + "/" + ( subInputStreamFingerprintList.size() - 1) + ")",j,subInputStreamFingerprint.getNumber());
@@ -193,8 +199,12 @@ public class EchoTest extends AbstractTest
 				assertEquals("size of outputSubStream (echo) should equals to size of respective inputSubStream (" + j + "/" + ( subInputStreamFingerprintList.size() - 1) + ")",subInputStreamFingerprint.getSize(),subOutputStreamFingerprint.getSize());
 				assertEquals("checksum of outputSubStream (echo) should equals to checksum of respective inputSubStream (" + j + "/" + ( subInputStreamFingerprintList.size() - 1) + ")",subInputStreamFingerprint.getMD5(),subOutputStreamFingerprint.getMD5());
 			}
-			
 		}
+		
+		System.out.println("[INFO]\t\t");
+		System.out.println("[INFO]\t\tPublished bytes: " + publishSize.get());
+		System.out.println("[INFO]\t\tConsumed bytes: " + consumeSize.get());
+		System.out.println("[INFO]\t\t");
 	}
 	
 }
