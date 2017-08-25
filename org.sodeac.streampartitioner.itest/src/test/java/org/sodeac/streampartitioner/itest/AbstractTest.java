@@ -131,7 +131,7 @@ public abstract class AbstractTest
 			features(karafStandardRepo , "scr"),
 			mavenBundle("org.easymock", "easymock", "3.4").start(),
 			reactorBundle("org.sodeac.streampartitioner.api","1.0.0").start(),
-			reactorBundle("org.sodeac.streampartitioner.provider","1.0.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.provider","1.0.1").start(),
 			reactorBundle("org.sodeac.streampartitioner.example","1.0.0").start()
 		};
 	}
