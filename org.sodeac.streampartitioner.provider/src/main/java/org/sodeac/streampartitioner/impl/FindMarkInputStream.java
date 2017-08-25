@@ -48,6 +48,8 @@ public class FindMarkInputStream extends InputStream
 	public static final int 	BUFFER_SIZE 						= 1080													;
 	public static final int 	MARK_SIZE 							= 90													;
 	
+	public static final int 	MIN_SITE_CLUSTERED_SHIFT			= 13													;
+	
 	// used area in buffer at all (payload, marks, unknown)
 	protected int 				readAheadBufferOffset 				= 0														;
 	protected int 				readAheadBufferLength 				= 0														;
@@ -166,21 +168,9 @@ public class FindMarkInputStream extends InputStream
 		}
 		
 		// invalid intern state
-		if(clientOffset < readAheadBufferOffset)
+		if(clientOffset != readAheadBufferOffset)
 		{
-			throw new IOException("clientOffset < readAheadBufferOffset");
-		}
-		
-		// harmonize offsets
-		if(clientOffset > readAheadBufferOffset)
-		{
-			int shift = clientOffset - readAheadBufferOffset;
-			for(int i = 0; i < readAheadBufferLength; i++)
-			{
-				readAheadBuffer[i]= readAheadBuffer[i+shift];
-			}
-			readAheadBufferLength -= shift;
-			clientOffset = readAheadBufferOffset;
+			throw new IOException("clientOffset != readAheadBufferOffset");
 		}
 		
 		// return bytes in buffer I
@@ -206,22 +196,48 @@ public class FindMarkInputStream extends InputStream
 			return -1;
 		}
 		
+		// invalid intern state
+		if(readAheadBufferLength < 0)
+		{
+			throw new IOException("readAheadBufferLength < 0 : " + readAheadBufferLength);
+		}
+		
 		// shift to position 0
 		if(readAheadBufferLength > 0)
 		{
-			if(readAheadBufferOffset > 0)
+			if(readAheadBufferOffset >= readAheadBufferLength)
+			{
+				System.arraycopy(readAheadBuffer, readAheadBufferOffset, readAheadBuffer, 0, readAheadBufferLength);
+			}
+			else if((readAheadBufferLength < (readAheadBuffer.length / 2)) && ((readAheadBuffer.length - (readAheadBufferOffset + readAheadBufferLength)) >= readAheadBufferLength) )
+			{
+				int tempOffset = readAheadBuffer.length - readAheadBufferLength;
+				System.arraycopy(readAheadBuffer, readAheadBufferOffset, readAheadBuffer, tempOffset, readAheadBufferLength);
+				System.arraycopy(readAheadBuffer, tempOffset, readAheadBuffer, 0, readAheadBufferLength);
+			}
+			else if (readAheadBufferOffset > MIN_SITE_CLUSTERED_SHIFT)
+			{
+				int tempOffset = readAheadBufferOffset;
+				int shiftClusterSize = readAheadBufferOffset;
+				int shiftPending = readAheadBufferLength;
+				while(shiftPending > 0)
+				{
+					if(shiftClusterSize > shiftPending)
+					{
+						shiftClusterSize = shiftPending;
+					}
+					System.arraycopy(readAheadBuffer, tempOffset, readAheadBuffer, readAheadBufferLength - shiftPending, shiftClusterSize);
+					shiftPending -= shiftClusterSize;
+					tempOffset += shiftClusterSize;
+				}
+			}
+			else
 			{
 				for(int i = 0; i < readAheadBufferLength; i++)
 				{
 					readAheadBuffer[i]= readAheadBuffer[i+readAheadBufferOffset];
 				}
 			}
-		}
-		
-		// invalid intern state
-		if(readAheadBufferLength < 0)
-		{
-			throw new IOException("readAheadBufferLength < 0 : " + readAheadBufferLength);
 		}
 				
 		// current state: everthing is normalized
