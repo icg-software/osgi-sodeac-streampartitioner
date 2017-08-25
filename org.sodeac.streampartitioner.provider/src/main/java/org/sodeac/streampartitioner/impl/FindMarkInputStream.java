@@ -48,6 +48,8 @@ public class FindMarkInputStream extends InputStream
 	public static final int 	BUFFER_SIZE 						= 1080													;
 	public static final int 	MARK_SIZE 							= 90													;
 	
+	public static final int 	MIN_SITE_CLUSTERED_SHIFT			= 13													;
+	
 	// used area in buffer at all (payload, marks, unknown)
 	protected int 				readAheadBufferOffset 				= 0														;
 	protected int 				readAheadBufferLength 				= 0														;
@@ -166,21 +168,9 @@ public class FindMarkInputStream extends InputStream
 		}
 		
 		// invalid intern state
-		if(clientOffset < readAheadBufferOffset)
+		if(clientOffset != readAheadBufferOffset)
 		{
-			throw new IOException("clientOffset < readAheadBufferOffset");
-		}
-		
-		// harmonize offsets
-		if(clientOffset > readAheadBufferOffset)
-		{
-			int shift = clientOffset - readAheadBufferOffset;
-			for(int i = 0; i < readAheadBufferLength; i++)
-			{
-				readAheadBuffer[i]= readAheadBuffer[i+shift];
-			}
-			readAheadBufferLength -= shift;
-			clientOffset = readAheadBufferOffset;
+			throw new IOException("clientOffset != readAheadBufferOffset");
 		}
 		
 		// return bytes in buffer I
@@ -206,22 +196,48 @@ public class FindMarkInputStream extends InputStream
 			return -1;
 		}
 		
+		// invalid intern state
+		if(readAheadBufferLength < 0)
+		{
+			throw new IOException("readAheadBufferLength < 0 : " + readAheadBufferLength);
+		}
+		
 		// shift to position 0
 		if(readAheadBufferLength > 0)
 		{
-			if(readAheadBufferOffset > 0)
+			if(readAheadBufferOffset >= readAheadBufferLength)
+			{
+				System.arraycopy(readAheadBuffer, readAheadBufferOffset, readAheadBuffer, 0, readAheadBufferLength);
+			}
+			else if((readAheadBufferLength < (readAheadBuffer.length / 2)) && ((readAheadBuffer.length - (readAheadBufferOffset + readAheadBufferLength)) >= readAheadBufferLength) )
+			{
+				int tempOffset = readAheadBuffer.length - readAheadBufferLength;
+				System.arraycopy(readAheadBuffer, readAheadBufferOffset, readAheadBuffer, tempOffset, readAheadBufferLength);
+				System.arraycopy(readAheadBuffer, tempOffset, readAheadBuffer, 0, readAheadBufferLength);
+			}
+			else if (readAheadBufferOffset > MIN_SITE_CLUSTERED_SHIFT)
+			{
+				int tempOffset = readAheadBufferOffset;
+				int shiftClusterSize = readAheadBufferOffset;
+				int shiftPending = readAheadBufferLength;
+				while(shiftPending > 0)
+				{
+					if(shiftClusterSize > shiftPending)
+					{
+						shiftClusterSize = shiftPending;
+					}
+					System.arraycopy(readAheadBuffer, tempOffset, readAheadBuffer, readAheadBufferLength - shiftPending, shiftClusterSize);
+					shiftPending -= shiftClusterSize;
+					tempOffset += shiftClusterSize;
+				}
+			}
+			else
 			{
 				for(int i = 0; i < readAheadBufferLength; i++)
 				{
 					readAheadBuffer[i]= readAheadBuffer[i+readAheadBufferOffset];
 				}
 			}
-		}
-		
-		// invalid intern state
-		if(readAheadBufferLength < 0)
-		{
-			throw new IOException("readAheadBufferLength < 0 : " + readAheadBufferLength);
 		}
 				
 		// current state: everthing is normalized
@@ -253,70 +269,70 @@ public class FindMarkInputStream extends InputStream
 			else
 			{
 				readAheadBufferLength += readed;
-				
-				// current state: something is readed; offset in buffer: 0 (readAheadBufferOffset && clientOffset)
-				
-				// test for endsequence
-				for(; currentEndSequenceFindingPointer < readAheadBufferLength; currentEndSequenceFindingPointer++)
+			}
+			
+			// current state: something is readed; offset in buffer: 0 (readAheadBufferOffset && clientOffset)
+			
+			// test for endsequence
+			for(; currentEndSequenceFindingPointer < readAheadBufferLength; currentEndSequenceFindingPointer++)
+			{
+				byteToTestForEndSequence = readAheadBuffer[currentEndSequenceFindingPointer];
+				if(byteToTestForEndSequence != matchBeginBuffer[currentEndSequencePositiveMatchingLength])
 				{
-					byteToTestForEndSequence = readAheadBuffer[currentEndSequenceFindingPointer];
-					if(byteToTestForEndSequence != matchBeginBuffer[currentEndSequencePositiveMatchingLength])
-					{
-						// first byte of endsequence must be unique in endsequence => potential endsequence start (everytime)
-						if(byteToTestForEndSequence == matchBeginBuffer[0])
-						{
-							currentEndSequencePositiveMatchingOffset= currentEndSequenceFindingPointer;
-							currentEndSequencePositiveMatchingLength = 1;
-							continue;
-						}
-						// payloadbyte of substream (everytime)
-						currentEndSequencePositiveMatchingLength = 0;
-						currentEndSequencePositiveMatchingOffset = -1;
-						continue;
-					}
-					if(currentEndSequencePositiveMatchingLength == 0)
+					// first byte of endsequence must be unique in endsequence => potential endsequence start (everytime)
+					if(byteToTestForEndSequence == matchBeginBuffer[0])
 					{
 						currentEndSequencePositiveMatchingOffset= currentEndSequenceFindingPointer;
+						currentEndSequencePositiveMatchingLength = 1;
+						continue;
 					}
-					currentEndSequencePositiveMatchingLength++;
-					
-					if(currentEndSequencePositiveMatchingLength == matchBeginBuffer.length)
-					{
-						substreamEnds = true;
-						
-						// write carry out by copying the leftover of readed bytes
-						if((currentEndSequenceFindingPointer+1) < readAheadBufferLength)
-						{
-							int j = currentEndSequenceFindingPointer + 1;
-							carryout = new byte[readAheadBufferLength -j];
-							for(int x = 0; j < readAheadBufferLength ; j++,x++)
-							{
-								carryout[x] = readAheadBuffer[j];
-							}
-						}
-						clientLength = currentEndSequencePositiveMatchingOffset - clientOffset;
-						
-						// return bytes in buffer II
-						if(len > clientLength)
-						{
-							len = clientLength;
-						}
-						if(len == 0)
-						{
-							// all readed byte belongs to endsequence
-							return -1;
-						}
-						
-						System.arraycopy(readAheadBuffer, clientOffset, b, off,len);
-						clientLength -= len;
-						clientOffset +=len;
-						readAheadBufferOffset += len;
-						readAheadBufferLength -= len;
-						
-						return len;
+					// payloadbyte of substream (everytime)
+					currentEndSequencePositiveMatchingLength = 0;
+					currentEndSequencePositiveMatchingOffset = -1;
+					continue;
 					}
+				if(currentEndSequencePositiveMatchingLength == 0)
+				{
+					currentEndSequencePositiveMatchingOffset= currentEndSequenceFindingPointer;
 				}
-			}
+				currentEndSequencePositiveMatchingLength++;
+				
+				if(currentEndSequencePositiveMatchingLength == matchBeginBuffer.length)
+				{
+					substreamEnds = true;
+				
+					// write carry out by copying the leftover of readed bytes
+					if((currentEndSequenceFindingPointer+1) < readAheadBufferLength)
+					{
+						int j = currentEndSequenceFindingPointer + 1;
+						carryout = new byte[readAheadBufferLength -j];
+						for(int x = 0; j < readAheadBufferLength ; j++,x++)
+						{
+							carryout[x] = readAheadBuffer[j];
+						}
+					}
+					clientLength = currentEndSequencePositiveMatchingOffset - clientOffset;
+					
+					// return bytes in buffer II
+					if(len > clientLength)
+					{
+						len = clientLength;
+					}
+					if(len == 0)
+					{
+						// all readed byte belongs to endsequence
+						return -1;
+					}
+					
+					System.arraycopy(readAheadBuffer, clientOffset, b, off,len);
+					clientLength -= len;
+					clientOffset +=len;
+					readAheadBufferOffset += len;
+					readAheadBufferLength -= len;
+					
+					return len;
+				}
+			}	
 		}	
 		
 		
