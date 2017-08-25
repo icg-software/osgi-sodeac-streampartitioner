@@ -253,70 +253,70 @@ public class FindMarkInputStream extends InputStream
 			else
 			{
 				readAheadBufferLength += readed;
-				
-				// current state: something is readed; offset in buffer: 0 (readAheadBufferOffset && clientOffset)
-				
-				// test for endsequence
-				for(; currentEndSequenceFindingPointer < readAheadBufferLength; currentEndSequenceFindingPointer++)
+			}
+			
+			// current state: something is readed; offset in buffer: 0 (readAheadBufferOffset && clientOffset)
+			
+			// test for endsequence
+			for(; currentEndSequenceFindingPointer < readAheadBufferLength; currentEndSequenceFindingPointer++)
+			{
+				byteToTestForEndSequence = readAheadBuffer[currentEndSequenceFindingPointer];
+				if(byteToTestForEndSequence != matchBeginBuffer[currentEndSequencePositiveMatchingLength])
 				{
-					byteToTestForEndSequence = readAheadBuffer[currentEndSequenceFindingPointer];
-					if(byteToTestForEndSequence != matchBeginBuffer[currentEndSequencePositiveMatchingLength])
-					{
-						// first byte of endsequence must be unique in endsequence => potential endsequence start (everytime)
-						if(byteToTestForEndSequence == matchBeginBuffer[0])
-						{
-							currentEndSequencePositiveMatchingOffset= currentEndSequenceFindingPointer;
-							currentEndSequencePositiveMatchingLength = 1;
-							continue;
-						}
-						// payloadbyte of substream (everytime)
-						currentEndSequencePositiveMatchingLength = 0;
-						currentEndSequencePositiveMatchingOffset = -1;
-						continue;
-					}
-					if(currentEndSequencePositiveMatchingLength == 0)
+					// first byte of endsequence must be unique in endsequence => potential endsequence start (everytime)
+					if(byteToTestForEndSequence == matchBeginBuffer[0])
 					{
 						currentEndSequencePositiveMatchingOffset= currentEndSequenceFindingPointer;
+						currentEndSequencePositiveMatchingLength = 1;
+						continue;
 					}
-					currentEndSequencePositiveMatchingLength++;
-					
-					if(currentEndSequencePositiveMatchingLength == matchBeginBuffer.length)
-					{
-						substreamEnds = true;
-						
-						// write carry out by copying the leftover of readed bytes
-						if((currentEndSequenceFindingPointer+1) < readAheadBufferLength)
-						{
-							int j = currentEndSequenceFindingPointer + 1;
-							carryout = new byte[readAheadBufferLength -j];
-							for(int x = 0; j < readAheadBufferLength ; j++,x++)
-							{
-								carryout[x] = readAheadBuffer[j];
-							}
-						}
-						clientLength = currentEndSequencePositiveMatchingOffset - clientOffset;
-						
-						// return bytes in buffer II
-						if(len > clientLength)
-						{
-							len = clientLength;
-						}
-						if(len == 0)
-						{
-							// all readed byte belongs to endsequence
-							return -1;
-						}
-						
-						System.arraycopy(readAheadBuffer, clientOffset, b, off,len);
-						clientLength -= len;
-						clientOffset +=len;
-						readAheadBufferOffset += len;
-						readAheadBufferLength -= len;
-						
-						return len;
+					// payloadbyte of substream (everytime)
+					currentEndSequencePositiveMatchingLength = 0;
+					currentEndSequencePositiveMatchingOffset = -1;
+					continue;
 					}
+				if(currentEndSequencePositiveMatchingLength == 0)
+				{
+					currentEndSequencePositiveMatchingOffset= currentEndSequenceFindingPointer;
 				}
-			}
+				currentEndSequencePositiveMatchingLength++;
+				
+				if(currentEndSequencePositiveMatchingLength == matchBeginBuffer.length)
+				{
+					substreamEnds = true;
+				
+					// write carry out by copying the leftover of readed bytes
+					if((currentEndSequenceFindingPointer+1) < readAheadBufferLength)
+					{
+						int j = currentEndSequenceFindingPointer + 1;
+						carryout = new byte[readAheadBufferLength -j];
+						for(int x = 0; j < readAheadBufferLength ; j++,x++)
+						{
+							carryout[x] = readAheadBuffer[j];
+						}
+					}
+					clientLength = currentEndSequencePositiveMatchingOffset - clientOffset;
+					
+					// return bytes in buffer II
+					if(len > clientLength)
+					{
+						len = clientLength;
+					}
+					if(len == 0)
+					{
+						// all readed byte belongs to endsequence
+						return -1;
+					}
+					
+					System.arraycopy(readAheadBuffer, clientOffset, b, off,len);
+					clientLength -= len;
+					clientOffset +=len;
+					readAheadBufferOffset += len;
+					readAheadBufferLength -= len;
+					
+					return len;
+				}
+			}	
 		}	
 		
 		
