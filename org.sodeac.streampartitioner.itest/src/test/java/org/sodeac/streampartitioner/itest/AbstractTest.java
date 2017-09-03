@@ -107,13 +107,13 @@ public abstract class AbstractTest
 		MavenArtifactUrlReference karafUrl = maven()
 			.groupId("org.apache.karaf")
 			.artifactId("apache-karaf")
-			.version("4.1.1")
+			.version("4.1.2")
 			.type("zip");
 
 		MavenUrlReference karafStandardRepo = maven()
 			.groupId("org.apache.karaf.features")
 			.artifactId("standard")
-			.version("4.1.1")
+			.version("4.1.2")
 			.classifier("features")
 			.type("xml");
 		
