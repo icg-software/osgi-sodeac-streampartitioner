@@ -104,7 +104,7 @@ substream: third very short substream
 
 ## Functional principle
 
-The StreamPartitioner seperates substreams with unique markers.
+The StreamPartitioner seperates substreams with unique markers. A unique marker is a dynamic delimiter, so it's possible to encapsulate in a substream further sub streams.
 ![](https://spalarus.github.io/images/StreamPartitionerUsage.svg)
 ## License
 [Eclipse Public License 1.0](https://github.com/spalarus/osgi-sodeac-streampartitioner/blob/master/LICENSE)
