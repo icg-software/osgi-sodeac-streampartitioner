@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Sebastian Palarus
+ * Copyright (c) 2017, 2019 Sebastian Palarus
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,13 +107,13 @@ public abstract class AbstractTest
 		MavenArtifactUrlReference karafUrl = maven()
 			.groupId("org.apache.karaf")
 			.artifactId("apache-karaf")
-			.version("4.1.2")
+			.version("4.2.2")
 			.type("zip");
 
 		MavenUrlReference karafStandardRepo = maven()
 			.groupId("org.apache.karaf.features")
 			.artifactId("standard")
-			.version("4.1.2")
+			.version("4.2.2")
 			.classifier("features")
 			.type("xml");
 		
@@ -129,10 +129,10 @@ public abstract class AbstractTest
 			cleanCaches( true ),
 			logLevel(LogLevel.INFO),
 			features(karafStandardRepo , "scr"),
-			mavenBundle("org.easymock", "easymock", "3.4").start(),
-			reactorBundle("org.sodeac.streampartitioner.api","1.0.0").start(),
-			reactorBundle("org.sodeac.streampartitioner.provider","1.0.1").start(),
-			reactorBundle("org.sodeac.streampartitioner.example","1.0.0").start()
+			mavenBundle("org.easymock", "easymock", "3.6").start(),
+			reactorBundle("org.sodeac.streampartitioner.api","1.1.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.provider","1.1.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.example","1.1.0").start()
 		};
 	}
 }
