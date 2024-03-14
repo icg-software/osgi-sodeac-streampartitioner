@@ -107,13 +107,13 @@ public abstract class AbstractTest
 		MavenArtifactUrlReference karafUrl = maven()
 			.groupId("org.apache.karaf")
 			.artifactId("apache-karaf")
-			.version("4.2.2")
+			.version("4.4.5")
 			.type("zip");
 
 		MavenUrlReference karafStandardRepo = maven()
 			.groupId("org.apache.karaf.features")
 			.artifactId("standard")
-			.version("4.2.2")
+			.version("4.4.5")
 			.classifier("features")
 			.type("xml");
 		
@@ -130,9 +130,9 @@ public abstract class AbstractTest
 			logLevel(LogLevel.INFO),
 			features(karafStandardRepo , "scr"),
 			mavenBundle("org.easymock", "easymock", "3.6").start(),
-			reactorBundle("org.sodeac.streampartitioner.api","1.1.0").start(),
-			reactorBundle("org.sodeac.streampartitioner.provider","1.1.0").start(),
-			reactorBundle("org.sodeac.streampartitioner.example","1.1.0").start()
+			reactorBundle("org.sodeac.streampartitioner.api","2.1.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.provider","2.1.0").start(),
+			reactorBundle("org.sodeac.streampartitioner.example","2.1.0").start()
 		};
 	}
 }

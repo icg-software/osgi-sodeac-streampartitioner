@@ -22,8 +22,6 @@ import org.sodeac.streampartitioner.api.IInputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IOutputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IStreamPartitioner;
 import org.sodeac.streampartitioner.api.ISubStreamListener;
-import org.sodeac.streampartitioner.impl.InputStreamPartitionerImpl;
-import org.sodeac.streampartitioner.impl.StreamPartitionerFactoryImpl;
 
 public class StreamPartitionerSingleObjectTest
 {
