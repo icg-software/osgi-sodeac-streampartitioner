@@ -32,57 +32,57 @@ import org.sodeac.streampartitioner.example.api.IEchoClientFactory;
 import org.sodeac.streampartitioner.example.api.ServerNotRunningException;
 
 @Component
-(
-	property={EventConstants.EVENT_TOPIC+"=" + Events.TOPIC_NOTIFY_START_SERVER,EventConstants.EVENT_TOPIC+"=" + Events.TOPIC_NOTIFY_STOP_SERVER},
-	service={IEchoClientFactory.class,EventHandler.class}
-)
-public class EchoClientFactoryImpl implements IEchoClientFactory,EventHandler
+        (
+                property = { EventConstants.EVENT_TOPIC + "=" + Events.TOPIC_NOTIFY_START_SERVER, EventConstants.EVENT_TOPIC + "=" + Events.TOPIC_NOTIFY_STOP_SERVER },
+                service = { IEchoClientFactory.class, EventHandler.class }
+        )
+public class EchoClientFactoryImpl implements IEchoClientFactory, EventHandler
 {
-	private volatile SecretKeySpec keySpec = null; 
-	private volatile Integer knownPort = null;
-	
-	@Reference
-	private EventAdmin eventAdmin;
-	
-	@Reference
-	private volatile IStreamPartitionerFactory streamPartitionerFactory = null;
-	
-	@Activate
-	private void activate(ComponentContext context, Map<String, ?> properties)
-	{	
-		Event startServerEvent = new Event(Events.TOPIC_REQUEST_NOTIFY_SERVER_STATE,(Dictionary<String,Object>)new Hashtable<String,Object>());
-		eventAdmin.postEvent(startServerEvent);
-	}
-	
-	@Deactivate
-	private void deactivate(ComponentContext context)
-	{
-		this.knownPort = null;
-		this.keySpec = null;
-	}
+    private volatile SecretKeySpec keySpec = null;
+    private volatile Integer knownPort = null;
 
-	@Override
-	public IEchoClient createEchoClient() throws ServerNotRunningException
-	{
-		if(this.knownPort ==  null)
-		{
-			throw new ServerNotRunningException();
-		}
-		return new EchoClientImpl(this.knownPort,streamPartitionerFactory,keySpec);
-	}
+    @Reference
+    private EventAdmin eventAdmin;
 
-	@Override
-	public void handleEvent(Event event)
-	{
-		if(event.getTopic().equals(Events.TOPIC_NOTIFY_STOP_SERVER))
-		{
-			this.knownPort = null;
-		}
-		if(event.getTopic().equals(Events.TOPIC_NOTIFY_START_SERVER))
-		{
-			this.knownPort = (Integer)event.getProperty(Events.PROPERTY_TCP_PORT);
-			this.keySpec = (SecretKeySpec)event.getProperty(Events.PROPERTY_KEYSPEC);
-		}
-	}
+    @Reference
+    private volatile IStreamPartitionerFactory streamPartitionerFactory = null;
+
+    @Activate
+    private void activate(final ComponentContext context, final Map<String, ?> properties)
+    {
+        final Event startServerEvent = new Event(Events.TOPIC_REQUEST_NOTIFY_SERVER_STATE, (Dictionary<String, Object>) new Hashtable<String, Object>());
+        this.eventAdmin.postEvent(startServerEvent);
+    }
+
+    @Deactivate
+    private void deactivate(final ComponentContext context)
+    {
+        this.knownPort = null;
+        this.keySpec = null;
+    }
+
+    @Override
+    public IEchoClient createEchoClient() throws ServerNotRunningException
+    {
+        if(this.knownPort == null)
+        {
+            throw new ServerNotRunningException();
+        }
+        return new EchoClientImpl(this.knownPort, this.streamPartitionerFactory, this.keySpec);
+    }
+
+    @Override
+    public void handleEvent(final Event event)
+    {
+        if(event.getTopic().equals(Events.TOPIC_NOTIFY_STOP_SERVER))
+        {
+            this.knownPort = null;
+        }
+        if(event.getTopic().equals(Events.TOPIC_NOTIFY_START_SERVER))
+        {
+            this.knownPort = (Integer) event.getProperty(Events.PROPERTY_TCP_PORT);
+            this.keySpec = (SecretKeySpec) event.getProperty(Events.PROPERTY_KEYSPEC);
+        }
+    }
 
 }

@@ -12,43 +12,44 @@ package org.sodeac.streampartitioner.api;
 
 /**
  * An IStreamPartitioner provides basic functionality of partitioners
- * 
+ *
  * @author Sebastian Palarus
  * @since 1.0.0
  *
  */
 public interface IStreamPartitioner
 {
-	/**
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param subStreamListener register Listener for substream events
-	 */
-	public void addSubStreamListener(ISubStreamListener subStreamListener);
-	
-	/**
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param subStreamListener unregister a registered listener
-	 */
-	public void removeSubStreamListener(ISubStreamListener subStreamListener);
-	
-	/**
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param partId PartId of current substream to process in listeners
-	 * @return Partitioner 
-	 */
-	public IStreamPartitioner setPartId(String partId);
-	
-	/**
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @return PartId of current substream to process in listeners
-	 */
-	public String getPartId();
+    /**
+     *
+     * @param subStreamListener register Listener for substream events
+     *
+     * @since 1.0.0
+     */
+    void addSubStreamListener(ISubStreamListener subStreamListener);
+
+    /**
+     *
+     * @param subStreamListener unregister a registered listener
+     *
+     * @since 1.0.0
+     */
+    void removeSubStreamListener(ISubStreamListener subStreamListener);
+
+    /**
+     *
+     * @param partId PartId of current substream to process in listeners
+     *
+     * @return Partitioner
+     *
+     * @since 1.0.0
+     */
+    IStreamPartitioner setPartId(String partId);
+
+    /**
+     *
+     * @return PartId of current substream to process in listeners
+     *
+     * @since 1.0.0
+     */
+    String getPartId();
 }

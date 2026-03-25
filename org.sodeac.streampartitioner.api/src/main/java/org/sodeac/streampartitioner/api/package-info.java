@@ -9,12 +9,10 @@
  *     Sebastian Palarus - initial API and implementation
  *******************************************************************************/
 
-
 /**
- * 
- * Provides an API to partition a stream into substreams and vice versa. 
- * 
- * 
+ *
+ * Provides an API to partition a stream into substreams and vice versa.
+ *
  * @author Sebastian Palarus
  *
  */

@@ -12,6 +12,6 @@ package org.sodeac.streampartitioner.impl;
 
 public class PartContainer
 {
-	public int size;
-	public String MD5;
+    public int size;
+    public String MD5;
 }

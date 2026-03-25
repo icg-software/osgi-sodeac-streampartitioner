@@ -15,33 +15,34 @@ import java.io.OutputStream;
 
 /**
  * Provides a factory to create partitioners for {@link java.io.InputStream}s and {@link java.io.OutputStream}s.
- * 
+ *
  * @author Sebastian Palarus
  * @since 1.0.0
- * 
+ *
  */
 public interface IStreamPartitionerFactory
 {
-	/**
-	 * Create a new Instance of {@link IOutputStreamPartitioner}.  
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param parentOutputStream  The parent outputstream shall parted into multiple substreams.
-	 * @return Instance of {@link IOutputStreamPartitioner}
-	 */
-	public IOutputStreamPartitioner newOutputStreamPartitioner(OutputStream parentOutputStream);
-	
-	/**
-	 * 
-	 * Create a new Instance of {@link IInputStreamPartitioner}. 
-	 * 
-	 * @since 1.0.0
-	 *  
-	 * @param parentInputStream  The parent inputstream contains multiple substreams.
-	 * @return Instance of {@link IInputStreamPartitioner}
-	 */
-	public IInputStreamPartitioner newInputStreamPartitioner(InputStream parentInputStream);
-	
-	
+    /**
+     * Create a new Instance of {@link IOutputStreamPartitioner}.
+     *
+     * @param parentOutputStream The parent outputstream shall parted into multiple substreams.
+     *
+     * @return Instance of {@link IOutputStreamPartitioner}
+     *
+     * @since 1.0.0
+     */
+    IOutputStreamPartitioner newOutputStreamPartitioner(OutputStream parentOutputStream);
+
+    /**
+     *
+     * Create a new Instance of {@link IInputStreamPartitioner}.
+     *
+     * @param parentInputStream The parent inputstream contains multiple substreams.
+     *
+     * @return Instance of {@link IInputStreamPartitioner}
+     *
+     * @since 1.0.0
+     */
+    IInputStreamPartitioner newInputStreamPartitioner(InputStream parentInputStream);
+
 }

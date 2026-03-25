@@ -14,40 +14,39 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * 
+ *
  * An IOutputStreamPartitioner is a {@link IStreamPartitioner} to handle {@link java.io.OutputStream}s.
- * 
+ *
  * @author Sebastian Palarus
  * @since 1.0.0
  *
  */
 public interface IOutputStreamPartitioner extends IStreamPartitioner
 {
-	/**
-	 * @since 1.0.0
-	 * 
-	 * @return parent {@link java.io.OutputStream} feeds by substreams
-	 */
-	public OutputStream getParentOutputStream();
+    /**
+     * @return parent {@link java.io.OutputStream} feeds by substreams
+     *
+     * @since 1.0.0
+     */
+    OutputStream getParentOutputStream();
 
-	/**
-	 * Creates a new substream. This substream has to be close before before partitioner can create a new one.
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @return new substream shall embed in parent stream
-	 * @throws IOException delegated from parent stream
-	 */
-	public OutputStream createNextSubOutputStream() throws IOException;
-	
+    /**
+     * Creates a new substream. This substream has to be close before before partitioner can create a new one.
+     *
+     * @return new substream shall embed in parent stream
+     *
+     * @throws IOException delegated from parent stream
+     * @since 1.0.0
+     */
+    OutputStream createNextSubOutputStream() throws IOException;
 
-	/**
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param partId PartId of current substream to process in listeners
-	 * @return this Partitioner 
-	 */
-	@Override
-	public IOutputStreamPartitioner setPartId(String partId);
+    /**
+     *
+     * @param partId PartId of current substream to process in listeners
+     *
+     * @return this Partitioner
+     *
+     * @since 1.0.0
+     */
+    @Override IOutputStreamPartitioner setPartId(String partId);
 }

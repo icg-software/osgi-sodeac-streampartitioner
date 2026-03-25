@@ -11,22 +11,22 @@
 package org.sodeac.streampartitioner.api;
 
 /**
- * 
+ *
  * An interface for listener fired on close a substream
- * 
+ *
  * @author Sebastian Palarus
  * @since 1.0.0
  *
  */
 public interface ISubStreamListener
 {
-	/**
-	 * 
-	 * Fired if substream is closed
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @param streamPartitioner {@link IStreamPartitioner} creates the substream
-	 */
-	public void onClose(IStreamPartitioner streamPartitioner);
+    /**
+     *
+     * Fired if substream is closed
+     *
+     * @param streamPartitioner {@link IStreamPartitioner} creates the substream
+     *
+     * @since 1.0.0
+     */
+    void onClose(IStreamPartitioner streamPartitioner);
 }
