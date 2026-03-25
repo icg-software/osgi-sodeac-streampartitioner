@@ -17,21 +17,13 @@ import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.event.EventAdmin;
 import org.sodeac.streampartitioner.api.IStreamPartitionerFactory;
 
-@RunWith(PaxExam.class)
-@ExamReactorStrategy(PerSuite.class)
-public class BaseContainerTest extends AbstractTest
+public class BaseContainerIT extends AbstractIT
 {
     @Inject
     private BundleContext bundleContext;
@@ -41,12 +33,6 @@ public class BaseContainerTest extends AbstractTest
 
     @Inject
     private EventAdmin eventAdmin;
-
-    @Override @Configuration
-    public Option[] config()
-    {
-        return super.config();
-    }
 
     @Before
     public void setUp() { }

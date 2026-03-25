@@ -30,12 +30,6 @@ import javax.inject.Inject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerSuite;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -45,9 +39,7 @@ import org.sodeac.streampartitioner.example.api.IEchoClientFactory;
 import org.sodeac.streampartitioner.example.api.ServerNotRunningException;
 import org.sodeac.streampartitioner.example.api.SubStreamFingerprint;
 
-@RunWith(PaxExam.class)
-@ExamReactorStrategy(PerSuite.class)
-public class EchoTest extends AbstractTest
+public class EchoIT extends AbstractIT
 {
     public static final int TCP_PORT = 13579;
     public static final int DEFAULT_LENGTH = 1080;
@@ -62,12 +54,6 @@ public class EchoTest extends AbstractTest
     @Inject
     private IEchoClientFactory echoClientFactory;
 
-    @Override @Configuration
-    public Option[] config()
-    {
-        return super.config();
-    }
-
     @Before
     public void setUp()
     {
@@ -75,7 +61,7 @@ public class EchoTest extends AbstractTest
         System.out.println("[INFO]\tStart TCP Server");
 
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(Events.PROPERTY_TCP_PORT, EchoTest.TCP_PORT);
+        properties.put(Events.PROPERTY_TCP_PORT, EchoIT.TCP_PORT);
         final Event startServerEvent = new Event(Events.TOPIC_REQUEST_START_SERVER, properties);
         this.eventAdmin.postEvent(startServerEvent);
     }
@@ -87,7 +73,7 @@ public class EchoTest extends AbstractTest
         System.out.println();
 
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(Events.PROPERTY_TCP_PORT, EchoTest.TCP_PORT);
+        properties.put(Events.PROPERTY_TCP_PORT, EchoIT.TCP_PORT);
         final Event stopServerEvent = new Event(Events.TOPIC_REQUEST_STOP_SERVER, properties);
         this.eventAdmin.postEvent(stopServerEvent);
     }
