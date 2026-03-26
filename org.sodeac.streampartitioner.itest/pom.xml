@@ -23,14 +23,6 @@
             <artifactId>org.sodeac.streampartitioner.example</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>apache-karaf</artifactId>
-            <version>${karaf.version}</version>
-            <type>tar.gz</type>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
