@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.sodeac.streampartitioner.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,70 +27,44 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
+import java.util.random.RandomGenerator;
+import java.util.stream.IntStream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.sodeac.streampartitioner.api.IInputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IOutputStreamPartitioner;
 
-@RunWith(Parameterized.class)
 public class StreamPartitionerProducerTest
 {
-
     public static final int MODE_FILE = 0;
     public static final int MODE_MEMORY = 1;
 
-    private int maxTransferLength = -1;
     private final int mode = MODE_MEMORY; // better for my jenkins-tests on sdcard-driven rpi
 
-    public StreamPartitionerProducerTest(final int maxTransferLength)
+    static IntStream parameters()
     {
-        super();
-        this.maxTransferLength = maxTransferLength;
-    }
-
-    @Parameters
-    public static List<Object[]> parameters()
-    {
-        final List<Object[]> paramterList = new ArrayList<Object[]>();
+        final List<Integer> parameterList = new ArrayList<>();
 
         for (int i = 0; i <= 10800; i++)
         {
-            paramterList.add(new Object[] { i });
+            parameterList.add(i);
 
-            if(i > 50)
-            {
-                i += 5;
-            }
-
-            if(i > 100)
-            {
-                i += 10;
-            }
-
-            if(i > 1000)
-            {
-                i += 20;
-            }
-
-            if(i > 5000)
-            {
-                i += 30;
-            }
-
+            if(i > 50) { i += 5; }
+            if(i > 100) { i += 10; }
+            if(i > 1000) { i += 20; }
+            if(i > 5000) { i += 30; }
         }
 
-        return paramterList;
+        return parameterList.stream().mapToInt(Integer::intValue);
     }
 
-    @Test
-    public void testProduceConsumeAndCompare() throws IOException, NoSuchAlgorithmException
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testProduceConsumeAndCompare(final int maxTransferLength) throws IOException, NoSuchAlgorithmException
     {
-        System.out.println("[INFO]\t\tRun Producer Test: " + this.maxTransferLength);
+        System.out.println("[INFO]\t\tRun Producer Test: " + maxTransferLength);
         File testStreamFile = null;
         OutputStream testOutputStream = null;
         InputStream testInputStream = null;
@@ -99,7 +73,7 @@ public class StreamPartitionerProducerTest
         {
             final StreamPartitionerFactoryImpl partitionerFactoryImpl = new StreamPartitionerFactoryImpl();
 
-            final Random randomGenerator = new Random();
+            final RandomGenerator randomGenerator = RandomGenerator.getDefault();
             File tempDir = null;
             testStreamFile = null;
 
@@ -115,7 +89,7 @@ public class StreamPartitionerProducerTest
                 testOutputStream = new ByteArrayOutputStream();
             }
 
-            final List<PartContainer> partList = new ArrayList<PartContainer>();
+            final List<PartContainer> partList = new ArrayList<>();
 
             final IOutputStreamPartitioner ouputStreamPartitioner = partitionerFactoryImpl.newOutputStreamPartitioner(testOutputStream);
 
@@ -133,11 +107,10 @@ public class StreamPartitionerProducerTest
                 }
 
                 md5.update(part);
-
                 partContainer.MD5 = String.format("%032X", new BigInteger(1, md5.digest()));
 
                 final OutputStream partOutputStream = ouputStreamPartitioner.createNextSubOutputStream();
-                if(this.maxTransferLength == 0)
+                if(maxTransferLength == 0)
                 {
                     for (int j = 0; j < part.length; j++)
                     {
@@ -150,8 +123,8 @@ public class StreamPartitionerProducerTest
                     int pointer = 0;
                     while (todo > 0)
                     {
-                        int len = this.maxTransferLength;
-                        if(this.maxTransferLength > todo)
+                        int len = maxTransferLength;
+                        if(maxTransferLength > todo)
                         {
                             len = todo;
                         }
@@ -183,7 +156,6 @@ public class StreamPartitionerProducerTest
                 {
                     i += 50;
                 }
-
             }
 
             if(this.mode == MODE_FILE)
@@ -212,7 +184,8 @@ public class StreamPartitionerProducerTest
 
                 size = 0;
                 final InputStream partInputStream = inputStreamPartitioner.getNextSubInputStream();
-                assertNotNull("substream should not be null", partContainer);
+                assertNotNull(partInputStream, "substream should not be null");
+
                 while ((len = partInputStream.read(buffer, 0, buffer.length)) > 0)
                 {
                     md5.update(buffer, 0, len);
@@ -220,17 +193,19 @@ public class StreamPartitionerProducerTest
 
                     if(size > partContainer.size)
                     {
-                        assertEquals("size of container should not be less than substream", partContainer.size, size);
+                        assertEquals(partContainer.size, size, "size of container should not be less than substream");
                     }
                 }
 
-                assertEquals("size of container should be same", partContainer.size, size);
-                assertEquals("md5 of container should be same", partContainer.MD5, String.format("%032X", new BigInteger(1, md5.digest())));
+                assertEquals(partContainer.size, size, "size of container should be same");
+                assertEquals(partContainer.MD5, String.format("%032X", new BigInteger(1, md5.digest())),
+                        "md5 of container should be same");
 
                 partInputStream.close();
             }
 
-            assertNull("inputstreampartiioner should ends to provide partIn", inputStreamPartitioner.getNextSubInputStream());
+            assertNull(inputStreamPartitioner.getNextSubInputStream(),
+                    "inputstreampartiioner should ends to provide partIn");
 
             testInputStream.close();
             testInputStream = null;
@@ -254,6 +229,7 @@ public class StreamPartitionerProducerTest
                 }
             }
             catch (final Exception e) { }
+
             try
             {
                 if(testStreamFile != null)
@@ -266,6 +242,5 @@ public class StreamPartitionerProducerTest
             }
             catch (final Exception e) { }
         }
-
     }
 }

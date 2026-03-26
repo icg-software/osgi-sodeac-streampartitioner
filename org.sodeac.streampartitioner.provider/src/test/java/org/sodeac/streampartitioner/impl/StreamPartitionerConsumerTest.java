@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.sodeac.streampartitioner.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,252 +27,190 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
+import java.util.random.RandomGenerator;
+import java.util.stream.IntStream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.sodeac.streampartitioner.api.IInputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IOutputStreamPartitioner;
 
-@RunWith(Parameterized.class)
+import lombok.val;
+
 public class StreamPartitionerConsumerTest
 {
     public static final int MODE_FILE = 0;
     public static final int MODE_MEMORY = 1;
 
-    private int maxTransferLength = -1;
     private final int mode = MODE_MEMORY; // better for my jenkins-tests on sdcard-driven rpi
 
-    public StreamPartitionerConsumerTest(final int maxTransferLength)
+    static IntStream parameters()
     {
-        super();
-        this.maxTransferLength = maxTransferLength;
-    }
-
-    @Parameters
-    public static List<Object[]> parameters()
-    {
-        final List<Object[]> paramterList = new ArrayList<Object[]>();
+        final IntStream.Builder builder = IntStream.builder();
 
         for (int i = 0; i <= 10800; i++)
         {
-            paramterList.add(new Object[] { i });
+            builder.add(i);
 
-            if(i > 50)
-            {
-                i += 5;
-            }
-
-            if(i > 100)
-            {
-                i += 10;
-            }
-
-            if(i > 1000)
-            {
-                i += 20;
-            }
-
-            if(i > 5000)
-            {
-                i += 30;
-            }
-
+            if(i > 50) { i += 5; }
+            if(i > 100) { i += 10; }
+            if(i > 1000) { i += 20; }
+            if(i > 5000) { i += 30; }
         }
-        return paramterList;
+
+        return builder.build();
     }
 
-    @Test
-    public void testProduceConsumeAndCompare() throws IOException, NoSuchAlgorithmException
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testProduceConsumeAndCompare(final int maxTransferLength) throws IOException, NoSuchAlgorithmException
     {
-        System.out.println("[INFO]\t\tRun Consumer Test:  " + this.maxTransferLength);
-        File testStreamFile = null;
-        OutputStream testOutputStream = null;
-        InputStream testInputStream = null;
+        System.out.println("[INFO]\t\tRun Consumer Test:  " + maxTransferLength);
 
-        try
+        final StreamPartitionerFactoryImpl partitionerFactoryImpl = new StreamPartitionerFactoryImpl();
+        final RandomGenerator randomGenerator = RandomGenerator.getDefault();
+        final List<PartContainer> partList = new ArrayList<>();
+
+        if(this.mode == MODE_FILE)
         {
-            final StreamPartitionerFactoryImpl partitionerFactoryImpl = new StreamPartitionerFactoryImpl();
+            final File tempDir = new File(System.getProperty("java.io.tmpdir"));
+            val testStreamFile = new File(tempDir, getClass().getSimpleName() + "_" + UUID.randomUUID() + ".stream");
 
-            final Random randomGenerator = new Random();
-            File tempDir = null;
-            testStreamFile = null;
-
-            if(this.mode == MODE_FILE)
+            try (OutputStream testOutputStream = new FileOutputStream(testStreamFile))
             {
-                tempDir = new File(System.getProperty("java.io.tmpdir"));
-                testStreamFile = new File(tempDir, getClass().getSimpleName() + "_" + UUID.randomUUID() + ".stream");
-                testOutputStream = new FileOutputStream(testStreamFile);
+                produce(partitionerFactoryImpl, randomGenerator, partList, testOutputStream);
             }
 
-            if(this.mode == MODE_MEMORY)
+            try (InputStream testInputStream = new FileInputStream(testStreamFile))
             {
-                testOutputStream = new ByteArrayOutputStream();
+                consume(partitionerFactoryImpl, partList, testInputStream, maxTransferLength);
+            }
+        }
+        else
+        {
+            final byte[] data;
+
+            try (ByteArrayOutputStream testOutputStream = new ByteArrayOutputStream())
+            {
+                produce(partitionerFactoryImpl, randomGenerator, partList, testOutputStream);
+                data = testOutputStream.toByteArray();
             }
 
-            final List<PartContainer> partList = new ArrayList<PartContainer>();
-
-            final IOutputStreamPartitioner ouputStreamPartitioner = partitionerFactoryImpl.newOutputStreamPartitioner(testOutputStream);
-
-            for (int i = 0; i < 10800; i++)
+            try (InputStream testInputStream = new ByteArrayInputStream(data))
             {
-                final MessageDigest md5 = MessageDigest.getInstance("MD5");
-                md5.reset();
-                final PartContainer partContainer = new PartContainer();
-                partContainer.size = i;
+                consume(partitionerFactoryImpl, partList, testInputStream, maxTransferLength);
+            }
+        }
 
-                final byte[] part = new byte[i];
-                for (int j = 0; j < part.length; j++)
-                {
-                    part[j] = (byte) randomGenerator.nextInt(255);
-                }
+    }
 
-                md5.update(part);
+    private void produce(final StreamPartitionerFactoryImpl partitionerFactoryImpl,
+            final RandomGenerator randomGenerator,
+            final List<PartContainer> partList,
+            final OutputStream testOutputStream) throws IOException, NoSuchAlgorithmException
+    {
+        final IOutputStreamPartitioner outputStreamPartitioner = partitionerFactoryImpl.newOutputStreamPartitioner(testOutputStream);
 
-                partContainer.MD5 = String.format("%032X", new BigInteger(1, md5.digest()));
+        for (int i = 0; i < 10800; i++)
+        {
+            final MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.reset();
 
-                final OutputStream partOutputStream = ouputStreamPartitioner.createNextSubOutputStream();
+            final PartContainer partContainer = new PartContainer();
+            partContainer.size = i;
+
+            final byte[] part = new byte[i];
+            for (int j = 0; j < part.length; j++)
+            {
+                part[j] = (byte) randomGenerator.nextInt(255);
+            }
+
+            md5.update(part);
+            partContainer.MD5 = String.format("%032X", new BigInteger(1, md5.digest()));
+
+            try (OutputStream partOutputStream = outputStreamPartitioner.createNextSubOutputStream())
+            {
                 partOutputStream.write(part);
-                partOutputStream.close();
-
-                partList.add(partContainer);
-
-                if(i > 50)
-                {
-                    i += 10;
-                }
-
-                if(i > 100)
-                {
-                    i += 20;
-                }
-
-                if(i > 1000)
-                {
-                    i += 50;
-                }
-
-                if(i > 5000)
-                {
-                    i += 100;
-                }
-
             }
 
-            if(this.mode == MODE_FILE)
+            partList.add(partContainer);
+
+            if(i > 50) { i += 10; }
+            if(i > 100) { i += 20; }
+            if(i > 1000) { i += 50; }
+            if(i > 5000) { i += 100; }
+        }
+    }
+
+    private void consume(final StreamPartitionerFactoryImpl partitionerFactoryImpl,
+            final List<PartContainer> partList,
+            final InputStream testInputStream,
+            final int maxTransferLength) throws IOException, NoSuchAlgorithmException
+    {
+        final IInputStreamPartitioner inputStreamPartitioner = partitionerFactoryImpl.newInputStreamPartitioner(testInputStream);
+
+        final byte[] buffer = new byte[10800];
+
+        for (final PartContainer partContainer : partList)
+        {
+            final MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.reset();
+
+            int size = 0;
+
+            try (InputStream partInputStream = inputStreamPartitioner.getNextSubInputStream())
             {
-                testInputStream = new FileInputStream(testStreamFile);
-            }
+                assertNotNull(partInputStream, "substream should not be null");
 
-            if(this.mode == MODE_MEMORY)
-            {
-                testInputStream = new ByteArrayInputStream(((ByteArrayOutputStream) testOutputStream).toByteArray());
-            }
-
-            testOutputStream.close();
-            testOutputStream = null;
-
-            final IInputStreamPartitioner inputStreamPartitioner = partitionerFactoryImpl.newInputStreamPartitioner(testInputStream);
-
-            final byte[] buffer = new byte[10800];
-            int len;
-            int size;
-
-            for (final PartContainer partContainer : partList)
-            {
-                final MessageDigest md5 = MessageDigest.getInstance("MD5");
-                md5.reset();
-
-                size = 0;
-                final InputStream partInputStream = inputStreamPartitioner.getNextSubInputStream();
-                assertNotNull("substream should not be null", partContainer);
-
-                if(this.maxTransferLength == 0)
-                {
-                    // maxTransferLength = 1;
-                }
-                if(this.maxTransferLength == 0)
+                if(maxTransferLength == 0)
                 {
                     int readed;
-                    final byte[] readbyte = new byte[1];
+                    final byte[] readByte = new byte[1];
 
                     while ((readed = partInputStream.read()) > -1)
                     {
-                        readbyte[0] = (byte) readed;
-
-                        md5.update(readbyte);
+                        readByte[0] = (byte) readed;
+                        md5.update(readByte);
                         size++;
 
                         if(size > partContainer.size)
                         {
-                            assertEquals("size of container should not be less than substream", partContainer.size, size);
+                            assertEquals(partContainer.size, size,
+                                    "size of container should not be less than substream");
                         }
                     }
                 }
                 else
                 {
-                    int readlen = this.maxTransferLength;
-                    if(readlen + size > buffer.length)
+                    int len;
+                    int readLen = maxTransferLength;
+
+                    if(readLen + size > buffer.length)
                     {
-                        readlen = buffer.length - size;
+                        readLen = buffer.length - size;
                     }
-                    while ((len = partInputStream.read(buffer, size, readlen)) > 0)
+
+                    while ((len = partInputStream.read(buffer, size, readLen)) > 0)
                     {
                         md5.update(buffer, size, len);
                         size += len;
 
                         if(size > partContainer.size)
                         {
-                            assertEquals("size of container should not be less than substream", partContainer.size, size);
+                            assertEquals(partContainer.size, size,
+                                    "size of container should not be less than substream");
                         }
                     }
                 }
-
-                assertEquals("size of container should be same", partContainer.size, size);
-                assertEquals("md5 of container should be same", partContainer.MD5, String.format("%032X", new BigInteger(1, md5.digest())));
-
-                partInputStream.close();
             }
 
-            assertNull("inputstreampartiioner should ends to provide partIn", inputStreamPartitioner.getNextSubInputStream());
-
-            testInputStream.close();
-            testInputStream = null;
-        }
-        finally
-        {
-            try
-            {
-                if(testInputStream != null)
-                {
-                    testInputStream.close();
-                }
-            }
-            catch (final Exception e) { }
-
-            try
-            {
-                if(testOutputStream != null)
-                {
-                    testOutputStream.close();
-                }
-            }
-            catch (final Exception e) { }
-            try
-            {
-                if(testStreamFile != null)
-                {
-                    if(!testStreamFile.delete())
-                    {
-                        testStreamFile.deleteOnExit();
-                    }
-                }
-            }
-            catch (final Exception e) { }
+            assertEquals(partContainer.size, size, "size of container should be same");
+            assertEquals(partContainer.MD5, String.format("%032X", new BigInteger(1, md5.digest())),
+                    "md5 of container should be same");
         }
 
+        assertNull(inputStreamPartitioner.getNextSubInputStream(),
+                "inputstreampartiioner should ends to provide partIn");
     }
 }

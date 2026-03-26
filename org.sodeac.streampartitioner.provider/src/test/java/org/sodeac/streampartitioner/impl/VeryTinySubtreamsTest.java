@@ -20,7 +20,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sodeac.streampartitioner.api.IInputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IOutputStreamPartitioner;
 

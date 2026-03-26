@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.sodeac.streampartitioner.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sodeac.streampartitioner.api.IInputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IOutputStreamPartitioner;
 import org.sodeac.streampartitioner.api.IStreamPartitioner;
@@ -28,7 +28,6 @@ import org.sodeac.streampartitioner.api.ISubStreamListener;
 
 public class StreamPartitionerSingleObjectTest
 {
-
     @Test
     public void testInputStreamPartitioner()
     {
@@ -37,43 +36,38 @@ public class StreamPartitionerSingleObjectTest
         final InputStreamPartitionerImpl inputStreamPartitioner = new InputStreamPartitionerImpl(is, impl);
 
         // Locks
-
-        assertNotNull("lockCreate should be not null", inputStreamPartitioner.lockCreate);
-        assertNotNull("lockFinishListener should be not null", inputStreamPartitioner.lockFinishListener);
-        assertNotNull("writeLockFinishListener should be not null", inputStreamPartitioner.writeLockFinishListener);
-        assertNotNull("readLockFinishListener should be not null", inputStreamPartitioner.readLockFinishListener);
+        assertNotNull(inputStreamPartitioner.lockCreate, "lockCreate should be not null");
+        assertNotNull(inputStreamPartitioner.lockFinishListener, "lockFinishListener should be not null");
+        assertNotNull(inputStreamPartitioner.writeLockFinishListener, "writeLockFinishListener should be not null");
+        assertNotNull(inputStreamPartitioner.readLockFinishListener, "readLockFinishListener should be not null");
 
         // Test InputStream
-
-        assertSame("inputstream should be set", is, inputStreamPartitioner.parentInputStream);
+        assertSame(is, inputStreamPartitioner.parentInputStream, "inputstream should be set");
 
         // Part Id
-
         final String partId = UUID.randomUUID().toString();
 
-        assertNull("partid should be null", inputStreamPartitioner.partId);
+        assertNull(inputStreamPartitioner.partId, "partid should be null");
 
         final IInputStreamPartitioner isp = inputStreamPartitioner.setPartId(partId);
 
-        assertEquals("partid should be set", partId, inputStreamPartitioner.partId);
-        assertSame("setPartId(partId) should return invokes partitioner", inputStreamPartitioner, isp);
+        assertEquals(partId, inputStreamPartitioner.partId, "partid should be set");
+        assertSame(inputStreamPartitioner, isp, "setPartId(partId) should return invokes partitioner");
 
         // CarryOut
-
         final byte[] carryout = new byte[1];
 
-        assertNull("carryout should be null", inputStreamPartitioner.carryout);
+        assertNull(inputStreamPartitioner.carryout, "carryout should be null");
 
         inputStreamPartitioner.setCarryOut(carryout);
 
-        assertSame("carryout should be set", carryout, inputStreamPartitioner.carryout);
+        assertSame(carryout, inputStreamPartitioner.carryout, "carryout should be set");
 
         final AtomicLong counter = new AtomicLong(0);
         final StringBuilder firedWithPartId = new StringBuilder();
 
         final ISubStreamListener finishedListener = new ISubStreamListener()
         {
-
             @Override
             public void onClose(final IStreamPartitioner partitioner)
             {
@@ -83,30 +77,28 @@ public class StreamPartitionerSingleObjectTest
         };
 
         // Test add listener
-
         inputStreamPartitioner.addSubStreamListener(finishedListener);
 
-        assertEquals("inputpackage should contains 1 finishlistener", 1, inputStreamPartitioner.payloadPartFinishedListenerList.size());
+        assertEquals(1, inputStreamPartitioner.payloadPartFinishedListenerList.size(),
+                "inputpackage should contains 1 finishlistener");
 
         // Test don't add listener twice
-
         inputStreamPartitioner.addSubStreamListener(finishedListener);
 
-        assertEquals("inputpackage should contains 1 finishlistener", 1, inputStreamPartitioner.payloadPartFinishedListenerList.size());
+        assertEquals(1, inputStreamPartitioner.payloadPartFinishedListenerList.size(),
+                "inputpackage should contains 1 finishlistener");
 
         inputStreamPartitioner.fireSubStreamCloseEvent();
 
         // Test notify listener
-
-        assertEquals("finishedListener should notify one time", 1L, counter.get());
-        assertEquals("finishedListener should notify with correct partid", partId, firedWithPartId.toString());
+        assertEquals(1L, counter.get(), "finishedListener should notify one time");
+        assertEquals(partId, firedWithPartId.toString(), "finishedListener should notify with correct partid");
 
         // Test removeListener
-
         inputStreamPartitioner.removeSubStreamListener(finishedListener);
 
-        assertEquals("inputpackage should contains 0 finishlistener", 0, inputStreamPartitioner.payloadPartFinishedListenerList.size());
-
+        assertEquals(0, inputStreamPartitioner.payloadPartFinishedListenerList.size(),
+                "inputpackage should contains 0 finishlistener");
     }
 
     @Test
@@ -117,33 +109,29 @@ public class StreamPartitionerSingleObjectTest
         final OutputStreamPartitionerImpl outputStreamPartitioner = new OutputStreamPartitionerImpl(os, impl);
 
         // Locks
-
-        assertNotNull("lockCreate should be not null", outputStreamPartitioner.lockCreate);
-        assertNotNull("lockFinishListener should be not null", outputStreamPartitioner.lockFinishListener);
-        assertNotNull("writeLockFinishListener should be not null", outputStreamPartitioner.writeLockFinishListener);
-        assertNotNull("readLockFinishListener should be not null", outputStreamPartitioner.readLockFinishListener);
+        assertNotNull(outputStreamPartitioner.lockCreate, "lockCreate should be not null");
+        assertNotNull(outputStreamPartitioner.lockFinishListener, "lockFinishListener should be not null");
+        assertNotNull(outputStreamPartitioner.writeLockFinishListener, "writeLockFinishListener should be not null");
+        assertNotNull(outputStreamPartitioner.readLockFinishListener, "readLockFinishListener should be not null");
 
         // Test OutputStream
-
-        assertSame("outputstream shoult be set", os, outputStreamPartitioner.parentOutputStream);
+        assertSame(os, outputStreamPartitioner.parentOutputStream, "outputstream shoult be set");
 
         // Part Id
-
         final String partId = UUID.randomUUID().toString();
 
-        assertNull("partid should be null", outputStreamPartitioner.partId);
+        assertNull(outputStreamPartitioner.partId, "partid should be null");
 
         final IOutputStreamPartitioner osp = outputStreamPartitioner.setPartId(partId);
 
-        assertEquals("partid should be set", partId, outputStreamPartitioner.partId);
-        assertSame("setPartId(partId) should return invokes partitioner", outputStreamPartitioner, osp);
+        assertEquals(partId, outputStreamPartitioner.partId, "partid should be set");
+        assertSame(outputStreamPartitioner, osp, "setPartId(partId) should return invokes partitioner");
 
         final AtomicLong counter = new AtomicLong(0);
         final StringBuilder firedWithPartId = new StringBuilder();
 
         final ISubStreamListener finishedListener = new ISubStreamListener()
         {
-
             @Override
             public void onClose(final IStreamPartitioner partitioner)
             {
@@ -153,30 +141,27 @@ public class StreamPartitionerSingleObjectTest
         };
 
         // Test add listener
-
         outputStreamPartitioner.addSubStreamListener(finishedListener);
 
-        assertEquals("outputpackage should contains 1 finishlistener", 1, outputStreamPartitioner.payloadPartFinishedListenerList.size());
+        assertEquals(1, outputStreamPartitioner.payloadPartFinishedListenerList.size(),
+                "outputpackage should contains 1 finishlistener");
 
         // Test don't add listener twice
-
         outputStreamPartitioner.addSubStreamListener(finishedListener);
 
-        assertEquals("outputpackage should contains 1 finishlistener", 1, outputStreamPartitioner.payloadPartFinishedListenerList.size());
+        assertEquals(1, outputStreamPartitioner.payloadPartFinishedListenerList.size(),
+                "outputpackage should contains 1 finishlistener");
 
         outputStreamPartitioner.fireSubStreamCloseEvent();
 
         // Test notify listener
-
-        assertEquals("finishedListener should notify one time", 1L, counter.get());
-        assertEquals("finishedListener should notify with correct partid", partId, firedWithPartId.toString());
+        assertEquals(1L, counter.get(), "finishedListener should notify one time");
+        assertEquals(partId, firedWithPartId.toString(), "finishedListener should notify with correct partid");
 
         // Test removeListener
-
         outputStreamPartitioner.removeSubStreamListener(finishedListener);
 
-        assertEquals("outputpackage should contains 0 finishlistener", 0, outputStreamPartitioner.payloadPartFinishedListenerList.size());
-
+        assertEquals(0, outputStreamPartitioner.payloadPartFinishedListenerList.size(),
+                "outputpackage should contains 0 finishlistener");
     }
-
 }
