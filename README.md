@@ -4,6 +4,31 @@
 
 An OSGi-service splits streams (java.io.InputStream and java.io.OutputStream) in substreams.
 
+## Installation
+
+- runs with Apache Karaf 4.4.10 → OSGi 8.0.0
+- `mvn clean install`
+
+### via Karaf commands
+
+```bash
+# open karaf console
+karaf
+```
+
+```bash
+
+# Prerequisites
+
+# --- project bundle
+install -s mvn:org.sodeac/org.sodeac.streampartitioner.api/2.0.0-SNAPSHOT
+install -s mvn:org.sodeac/org.sodeac.streampartitioner.provider/2.0.0-SNAPSHOT
+install -s mvn:org.sodeac/org.sodeac.streampartitioner.example/2.0.0-SNAPSHOT
+
+# Debug: SNAPSHOT + 'karaf debug' (not 'karaf')
+# bundle:watch org.sodeac.common 
+```
+
 ## Maven
 
 ``` xml
