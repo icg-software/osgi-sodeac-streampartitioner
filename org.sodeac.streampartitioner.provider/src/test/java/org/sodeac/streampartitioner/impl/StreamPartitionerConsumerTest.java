@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Sebastian Palarus
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- *     Sebastian Palarus - initial API and implementation
+ * Copyright (c) 2017, 2019 Sebastian Palarus All rights reserved. This program
+ * and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v20.html Contributors:
+ * Sebastian Palarus - initial API and implementation
  *******************************************************************************/
 package org.sodeac.streampartitioner.impl;
 
@@ -42,46 +39,58 @@ public class StreamPartitionerConsumerTest
 {
     public static final int MODE_FILE = 0;
     public static final int MODE_MEMORY = 1;
-
+    
     private final int mode = MODE_MEMORY; // better for my jenkins-tests on sdcard-driven rpi
-
+    
     static IntStream parameters()
     {
         final IntStream.Builder builder = IntStream.builder();
-
+        
         for (int i = 0; i <= 10800; i++)
         {
             builder.add(i);
-
-            if(i > 50) { i += 5; }
-            if(i > 100) { i += 10; }
-            if(i > 1000) { i += 20; }
-            if(i > 5000) { i += 30; }
+            
+            if (i > 50)
+            {
+                i += 5;
+            }
+            if (i > 100)
+            {
+                i += 10;
+            }
+            if (i > 1000)
+            {
+                i += 20;
+            }
+            if (i > 5000)
+            {
+                i += 30;
+            }
         }
-
+        
         return builder.build();
     }
-
+    
     @ParameterizedTest
     @MethodSource("parameters")
     public void testProduceConsumeAndCompare(final int maxTransferLength) throws IOException, NoSuchAlgorithmException
     {
         System.out.println("[INFO]\t\tRun Consumer Test:  " + maxTransferLength);
-
+        
         final StreamPartitionerFactoryImpl partitionerFactoryImpl = new StreamPartitionerFactoryImpl();
         final RandomGenerator randomGenerator = RandomGenerator.getDefault();
         final List<PartContainer> partList = new ArrayList<>();
-
-        if(this.mode == MODE_FILE)
+        
+        if (this.mode == MODE_FILE)
         {
             final File tempDir = new File(System.getProperty("java.io.tmpdir"));
             val testStreamFile = new File(tempDir, getClass().getSimpleName() + "_" + UUID.randomUUID() + ".stream");
-
+            
             try (OutputStream testOutputStream = new FileOutputStream(testStreamFile))
             {
                 produce(partitionerFactoryImpl, randomGenerator, partList, testOutputStream);
             }
-
+            
             try (InputStream testInputStream = new FileInputStream(testStreamFile))
             {
                 consume(partitionerFactoryImpl, partList, testInputStream, maxTransferLength);
@@ -90,94 +99,107 @@ public class StreamPartitionerConsumerTest
         else
         {
             final byte[] data;
-
+            
             try (ByteArrayOutputStream testOutputStream = new ByteArrayOutputStream())
             {
                 produce(partitionerFactoryImpl, randomGenerator, partList, testOutputStream);
                 data = testOutputStream.toByteArray();
             }
-
+            
             try (InputStream testInputStream = new ByteArrayInputStream(data))
             {
                 consume(partitionerFactoryImpl, partList, testInputStream, maxTransferLength);
             }
         }
-
+        
     }
-
+    
     private void produce(final StreamPartitionerFactoryImpl partitionerFactoryImpl,
-            final RandomGenerator randomGenerator,
-            final List<PartContainer> partList,
-            final OutputStream testOutputStream) throws IOException, NoSuchAlgorithmException
+        final RandomGenerator randomGenerator,
+        final List<PartContainer> partList,
+        final OutputStream testOutputStream) throws IOException, NoSuchAlgorithmException
     {
         final IOutputStreamPartitioner outputStreamPartitioner = partitionerFactoryImpl.newOutputStreamPartitioner(testOutputStream);
-
+        
         for (int i = 0; i < 10800; i++)
         {
             final MessageDigest md5 = MessageDigest.getInstance("MD5");
             md5.reset();
-
+            
             final PartContainer partContainer = new PartContainer();
             partContainer.size = i;
-
+            
             final byte[] part = new byte[i];
             for (int j = 0; j < part.length; j++)
             {
                 part[j] = (byte) randomGenerator.nextInt(255);
             }
-
+            
             md5.update(part);
             partContainer.MD5 = String.format("%032X", new BigInteger(1, md5.digest()));
-
+            
             try (OutputStream partOutputStream = outputStreamPartitioner.createNextSubOutputStream())
             {
                 partOutputStream.write(part);
             }
-
+            
             partList.add(partContainer);
-
-            if(i > 50) { i += 10; }
-            if(i > 100) { i += 20; }
-            if(i > 1000) { i += 50; }
-            if(i > 5000) { i += 100; }
+            
+            if (i > 50)
+            {
+                i += 10;
+            }
+            if (i > 100)
+            {
+                i += 20;
+            }
+            if (i > 1000)
+            {
+                i += 50;
+            }
+            if (i > 5000)
+            {
+                i += 100;
+            }
         }
     }
-
+    
     private void consume(final StreamPartitionerFactoryImpl partitionerFactoryImpl,
-            final List<PartContainer> partList,
-            final InputStream testInputStream,
-            final int maxTransferLength) throws IOException, NoSuchAlgorithmException
+        final List<PartContainer> partList,
+        final InputStream testInputStream,
+        final int maxTransferLength) throws IOException, NoSuchAlgorithmException
     {
         final IInputStreamPartitioner inputStreamPartitioner = partitionerFactoryImpl.newInputStreamPartitioner(testInputStream);
-
+        
         final byte[] buffer = new byte[10800];
-
+        
         for (final PartContainer partContainer : partList)
         {
             final MessageDigest md5 = MessageDigest.getInstance("MD5");
             md5.reset();
-
+            
             int size = 0;
-
+            
             try (InputStream partInputStream = inputStreamPartitioner.getNextSubInputStream())
             {
                 assertNotNull(partInputStream, "substream should not be null");
-
-                if(maxTransferLength == 0)
+                
+                if (maxTransferLength == 0)
                 {
                     int readed;
                     final byte[] readByte = new byte[1];
-
+                    
                     while ((readed = partInputStream.read()) > -1)
                     {
                         readByte[0] = (byte) readed;
                         md5.update(readByte);
                         size++;
-
-                        if(size > partContainer.size)
+                        
+                        if (size > partContainer.size)
                         {
                             assertEquals(partContainer.size, size,
-                                    "size of container should not be less than substream");
+                                         "size of container should not be less than substream"
+                            );
                         }
                     }
                 }
@@ -185,32 +207,35 @@ public class StreamPartitionerConsumerTest
                 {
                     int len;
                     int readLen = maxTransferLength;
-
-                    if(readLen + size > buffer.length)
+                    
+                    if (readLen + size > buffer.length)
                     {
                         readLen = buffer.length - size;
                     }
-
+                    
                     while ((len = partInputStream.read(buffer, size, readLen)) > 0)
                     {
                         md5.update(buffer, size, len);
                         size += len;
-
-                        if(size > partContainer.size)
+                        
+                        if (size > partContainer.size)
                         {
                             assertEquals(partContainer.size, size,
-                                    "size of container should not be less than substream");
+                                         "size of container should not be less than substream"
+                            );
                         }
                     }
                 }
             }
-
+            
             assertEquals(partContainer.size, size, "size of container should be same");
             assertEquals(partContainer.MD5, String.format("%032X", new BigInteger(1, md5.digest())),
-                    "md5 of container should be same");
+                         "md5 of container should be same"
+            );
         }
-
+        
         assertNull(inputStreamPartitioner.getNextSubInputStream(),
-                "inputstreampartiioner should ends to provide partIn");
+                   "inputstreampartiioner should ends to provide partIn"
+        );
     }
 }

@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Sebastian Palarus
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- *     Sebastian Palarus - initial API and implementation
+ * Copyright (c) 2017, 2019 Sebastian Palarus All rights reserved. This program
+ * and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v20.html Contributors:
+ * Sebastian Palarus - initial API and implementation
  *******************************************************************************/
 package org.sodeac.streampartitioner.api;
 
@@ -14,27 +11,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Provides a factory to create partitioners for {@link java.io.InputStream}s and {@link java.io.OutputStream}s.
+ * Provides a factory to create partitioners for {@link java.io.InputStream}s
+ * and {@link java.io.OutputStream}s.
  *
  * @author Sebastian Palarus
  * @since 1.0.0
- *
  */
 public interface IStreamPartitionerFactory
 {
     /**
      * Create a new Instance of {@link IOutputStreamPartitioner}.
      *
-     * @param parentOutputStream The parent outputstream shall parted into multiple substreams.
+     * @param parentOutputStream The parent outputstream shall parted into multiple
+     *                           substreams.
      *
      * @return Instance of {@link IOutputStreamPartitioner}
      *
      * @since 1.0.0
      */
     IOutputStreamPartitioner newOutputStreamPartitioner(OutputStream parentOutputStream);
-
+    
     /**
-     *
      * Create a new Instance of {@link IInputStreamPartitioner}.
      *
      * @param parentInputStream The parent inputstream contains multiple substreams.
@@ -44,5 +41,5 @@ public interface IStreamPartitionerFactory
      * @since 1.0.0
      */
     IInputStreamPartitioner newInputStreamPartitioner(InputStream parentInputStream);
-
+    
 }

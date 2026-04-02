@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Sebastian Palarus
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- *     Sebastian Palarus - initial API and implementation
+ * Copyright (c) 2017, 2019 Sebastian Palarus All rights reserved. This program
+ * and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v20.html Contributors:
+ * Sebastian Palarus - initial API and implementation
  *******************************************************************************/
 package org.sodeac.streampartitioner.example.api;
 
@@ -24,36 +21,36 @@ public class SubStreamFingerprint
         this.number = number;
         this.size = 0L;
     }
-
+    
     private final MessageDigest md5;
     private final int number;
     private long size;
     private String MD5;
-
+    
     public int getNumber()
     {
         return this.number;
     }
-
+    
     public long getSize()
     {
         return this.size;
     }
-
+    
     public String getMD5()
     {
         return this.MD5;
     }
-
+    
     public void processBytes(final byte[] b, final int off, final int len)
     {
         this.size += len;
         this.md5.update(b, off, len);
     }
-
+    
     public void createMD5String()
     {
         this.MD5 = String.format("%032X", new BigInteger(1, this.md5.digest()));
     }
-
+    
 }

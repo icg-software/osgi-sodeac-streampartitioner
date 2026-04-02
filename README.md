@@ -24,9 +24,6 @@ karaf
 install -s mvn:org.sodeac/org.sodeac.streampartitioner.api/2.0.0-SNAPSHOT
 install -s mvn:org.sodeac/org.sodeac.streampartitioner.provider/2.0.0-SNAPSHOT
 install -s mvn:org.sodeac/org.sodeac.streampartitioner.example/2.0.0-SNAPSHOT
-
-# Debug: SNAPSHOT + 'karaf debug' (not 'karaf')
-# bundle:watch org.sodeac.common 
 ```
 
 ## Maven

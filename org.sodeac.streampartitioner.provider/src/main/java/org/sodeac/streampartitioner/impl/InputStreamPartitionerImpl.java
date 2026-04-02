@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Sebastian Palarus
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- *     Sebastian Palarus - initial API and implementation
+ * Copyright (c) 2017, 2019 Sebastian Palarus All rights reserved. This program
+ * and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v20.html Contributors:
+ * Sebastian Palarus - initial API and implementation
  *******************************************************************************/
 package org.sodeac.streampartitioner.impl;
 
@@ -24,11 +21,10 @@ import org.sodeac.streampartitioner.api.IInputStreamPartitioner;
 import org.sodeac.streampartitioner.api.ISubStreamListener;
 
 /**
- *
- * Implementation of {@link org.sodeac.streampartitioner.api.IInputStreamPartitioner}
+ * Implementation of
+ * {@link org.sodeac.streampartitioner.api.IInputStreamPartitioner}
  *
  * @author Sebastian Palarus
- *
  */
 public class InputStreamPartitionerImpl implements IInputStreamPartitioner
 {
@@ -37,15 +33,15 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
     protected byte[] carryout = null;
     protected List<ISubStreamListener> payloadPartFinishedListenerList = null;
     protected String partId = null;
-
+    
     protected ReentrantLock lockCreate = null;
     protected ReentrantReadWriteLock lockFinishListener = null;
     protected ReadLock readLockFinishListener = null;
     protected WriteLock writeLockFinishListener = null;
-
+    
     /**
-     *
-     * @param parentInputStream        {@link java.io.InputStream} provides substreams
+     * @param parentInputStream        {@link java.io.InputStream} provides
+     *                                 substreams
      * @param streamPartitionerFactory factory creates this object
      */
     public InputStreamPartitionerImpl(final InputStream parentInputStream, final StreamPartitionerFactoryImpl streamPartitionerFactory)
@@ -53,13 +49,13 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
         super();
         this.parentInputStream = parentInputStream;
         this.streamPartitionerFactory = streamPartitionerFactory;
-
+        
         this.lockCreate = new ReentrantLock(true);
         this.lockFinishListener = new ReentrantReadWriteLock(true);
         this.readLockFinishListener = this.lockFinishListener.readLock();
         this.writeLockFinishListener = this.lockFinishListener.writeLock();
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -68,24 +64,24 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
     {
         return this.parentInputStream;
     }
-
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public void addSubStreamListener(final ISubStreamListener payloadPartFinishedListener)
     {
-        if(payloadPartFinishedListener == null)
+        if (payloadPartFinishedListener == null)
         {
             return;
         }
-
-        if(this.payloadPartFinishedListenerList == null)
+        
+        if (this.payloadPartFinishedListenerList == null)
         {
             try
             {
                 this.writeLockFinishListener.lock();
-                if(this.payloadPartFinishedListenerList == null)
+                if (this.payloadPartFinishedListenerList == null)
                 {
                     this.payloadPartFinishedListenerList = new ArrayList<ISubStreamListener>();
                 }
@@ -95,11 +91,12 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
                 this.writeLockFinishListener.unlock();
             }
         }
-
+        
         try
         {
             this.writeLockFinishListener.lock();
-            while (this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener)) { }
+            while (this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener))
+            { }
             this.payloadPartFinishedListenerList.add(payloadPartFinishedListener);
         }
         finally
@@ -107,7 +104,7 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
             this.writeLockFinishListener.unlock();
         }
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -117,18 +114,19 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
         try
         {
             this.writeLockFinishListener.lock();
-            if(this.payloadPartFinishedListenerList == null)
+            if (this.payloadPartFinishedListenerList == null)
             {
                 return;
             }
-            while (this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener)) { }
+            while (this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener))
+            { }
         }
         finally
         {
             this.writeLockFinishListener.unlock();
         }
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -138,7 +136,7 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
         this.partId = partId;
         return this;
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -147,7 +145,7 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
     {
         return this.partId;
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -158,27 +156,26 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
         this.partId = UUID.randomUUID().toString();
         return substream;
     }
-
+    
     /**
-     *
      * @param carryout too much readed bytes by last substream
      */
     public void setCarryOut(final byte[] carryout)
     {
         this.carryout = carryout;
     }
-
+    
     /**
-     *
      * @return too much readed bytes by last substream
      */
     public byte[] getCarryOut()
     {
         return this.carryout;
     }
-
+    
     /**
-     * Handle eventsystem of {@link org.sodeac.streampartitioner.api.ISubStreamListener}
+     * Handle eventsystem of
+     * {@link org.sodeac.streampartitioner.api.ISubStreamListener}
      */
     public void fireSubStreamCloseEvent()
     {
@@ -186,11 +183,11 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
         try
         {
             this.readLockFinishListener.lock();
-            if(this.payloadPartFinishedListenerList == null)
+            if (this.payloadPartFinishedListenerList == null)
             {
                 return;
             }
-            if(this.payloadPartFinishedListenerList.isEmpty())
+            if (this.payloadPartFinishedListenerList.isEmpty())
             {
                 return;
             }
@@ -201,7 +198,7 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
         {
             this.readLockFinishListener.unlock();
         }
-
+        
         for (final ISubStreamListener payloadPartFinishedListener : fireList)
         {
             try
@@ -214,10 +211,10 @@ public class InputStreamPartitionerImpl implements IInputStreamPartitioner
             }
         }
     }
-
+    
     /**
-     *
-     * @return SharedLock to synchronize activities of partitioner outside of this class
+     * @return SharedLock to synchronize activities of partitioner outside of this
+     * class
      */
     protected ReentrantLock getLockCreate()
     {
