@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Sebastian Palarus
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v20.html
- *
- * Contributors:
- *     Sebastian Palarus - initial API and implementation
+ * Copyright (c) 2017, 2019 Sebastian Palarus All rights reserved. This program
+ * and the accompanying materials are made available under the terms of the
+ * Eclipse Public License v2.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v20.html Contributors:
+ * Sebastian Palarus - initial API and implementation
  *******************************************************************************/
 package org.sodeac.streampartitioner.impl;
 
@@ -24,185 +21,186 @@ import org.sodeac.streampartitioner.api.IOutputStreamPartitioner;
 import org.sodeac.streampartitioner.api.ISubStreamListener;
 
 /**
- * 
- * Implementation of {@link org.sodeac.streampartitioner.api.IOutputStreamPartitioner}
- * 
- * 
- * @author Sebastian Palarus
+ * Implementation of
+ * {@link org.sodeac.streampartitioner.api.IOutputStreamPartitioner}
  *
+ * @author Sebastian Palarus
  */
 public class OutputStreamPartitionerImpl implements IOutputStreamPartitioner
 {
-	protected StreamPartitionerFactoryImpl 			streamPartitionerFactory 			= null;
-	protected OutputStream 							parentOutputStream 					= null;
-	protected List<ISubStreamListener> 				payloadPartFinishedListenerList 	= null;
-	protected String 								partId 								= null;
-	
-	protected ReentrantLock							lockCreate							= null;
-	protected ReentrantReadWriteLock 				lockFinishListener 					= null;
-	protected ReadLock 								readLockFinishListener 				= null;
-	protected WriteLock 							writeLockFinishListener 			= null;
-	
-	/**
-	 * 
-	 * @param parentOutputStream {@link java.io.OutputStream} shall to parted in substreams
-	 * @param streamPartitionerFactory
-	 */
-	public OutputStreamPartitionerImpl(OutputStream parentOutputStream, StreamPartitionerFactoryImpl streamPartitionerFactory)
-	{
-		super();
-		this.parentOutputStream			= parentOutputStream					;
-		this.streamPartitionerFactory 	= streamPartitionerFactory				;
-		
-		this.lockCreate					= new ReentrantLock(true)				;
-		this.lockFinishListener 		= new ReentrantReadWriteLock(true)		;
-		this.readLockFinishListener 	= this.lockFinishListener.readLock()	;
-		this.writeLockFinishListener 	= this.lockFinishListener.writeLock()	;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public OutputStream getParentOutputStream()
-	{
-		return parentOutputStream;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void addSubStreamListener(ISubStreamListener payloadPartFinishedListener)
-	{
-		if(payloadPartFinishedListener == null)
-		{
-			return;
-		}
-		
-		if(this.payloadPartFinishedListenerList ==  null)
-		{
-			try
-			{
-				writeLockFinishListener.lock();
-				if(this.payloadPartFinishedListenerList ==  null)
-				{
-					this.payloadPartFinishedListenerList = new ArrayList<ISubStreamListener>();
-				}
-			}
-			finally 
-			{
-				writeLockFinishListener.unlock();
-			}
-		}
-		
-		try
-		{
-			writeLockFinishListener.lock();
-			while(this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener)){}
-			this.payloadPartFinishedListenerList.add(payloadPartFinishedListener);
-		}
-		finally 
-		{
-			writeLockFinishListener.unlock();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void removeSubStreamListener(ISubStreamListener payloadPartFinishedListener)
-	{
-		try
-		{
-			writeLockFinishListener.lock();
-			if(this.payloadPartFinishedListenerList == null)
-			{
-				return;
-			}
-			while(this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener)){}
-		}
-		finally 
-		{
-			writeLockFinishListener.unlock();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public IOutputStreamPartitioner setPartId(String partId)
-	{
-		this.partId = partId;
-		return this;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getPartId()
-	{
-		return this.partId;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public OutputStream createNextSubOutputStream() throws IOException
-	{
-		OutputStream substream = this.streamPartitionerFactory.createOutputSubStream(this);
-		this.partId = UUID.randomUUID().toString();
-		return substream;
-	}
-	
-	/**
-	 * Handle eventsystem of {@link org.sodeac.streampartitioner.api.ISubStreamListener}
-	 */
-	public void fireSubStreamCloseEvent()
-	{
-		List<ISubStreamListener> fireList =  null;
-		try
-		{
-			readLockFinishListener.lock();
-			if(this.payloadPartFinishedListenerList == null)
-			{
-				return;
-			}
-			if(this.payloadPartFinishedListenerList.isEmpty())
-			{
-				return;
-			}
-			fireList = new ArrayList<ISubStreamListener>();
-			fireList.addAll(this.payloadPartFinishedListenerList);
-		}
-		finally 
-		{
-			readLockFinishListener.unlock();
-		}
-		
-		for(ISubStreamListener payloadPartFinishedListener : fireList)
-		{
-			try
-			{
-				payloadPartFinishedListener.onClose(this);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}	
-	}
-	
-	/**
-	 * 
-	 * @return SharedLock to synchronize activities of partitioner outside of this class 
-	 */
-	protected ReentrantLock getLockCreate()
-	{
-		return lockCreate;
-	}
+    protected StreamPartitionerFactoryImpl streamPartitionerFactory = null;
+    protected OutputStream parentOutputStream = null;
+    protected List<ISubStreamListener> payloadPartFinishedListenerList = null;
+    protected String partId = null;
+    
+    protected ReentrantLock lockCreate = null;
+    protected ReentrantReadWriteLock lockFinishListener = null;
+    protected ReadLock readLockFinishListener = null;
+    protected WriteLock writeLockFinishListener = null;
+    
+    /**
+     * @param parentOutputStream       {@link java.io.OutputStream} shall to parted
+     *                                 in substreams
+     * @param streamPartitionerFactory
+     */
+    public OutputStreamPartitionerImpl(final OutputStream parentOutputStream, final StreamPartitionerFactoryImpl streamPartitionerFactory)
+    {
+        super();
+        this.parentOutputStream = parentOutputStream;
+        this.streamPartitionerFactory = streamPartitionerFactory;
+        
+        this.lockCreate = new ReentrantLock(true);
+        this.lockFinishListener = new ReentrantReadWriteLock(true);
+        this.readLockFinishListener = this.lockFinishListener.readLock();
+        this.writeLockFinishListener = this.lockFinishListener.writeLock();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OutputStream getParentOutputStream()
+    {
+        return this.parentOutputStream;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addSubStreamListener(final ISubStreamListener payloadPartFinishedListener)
+    {
+        if (payloadPartFinishedListener == null)
+        {
+            return;
+        }
+        
+        if (this.payloadPartFinishedListenerList == null)
+        {
+            try
+            {
+                this.writeLockFinishListener.lock();
+                if (this.payloadPartFinishedListenerList == null)
+                {
+                    this.payloadPartFinishedListenerList = new ArrayList<ISubStreamListener>();
+                }
+            }
+            finally
+            {
+                this.writeLockFinishListener.unlock();
+            }
+        }
+        
+        try
+        {
+            this.writeLockFinishListener.lock();
+            while (this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener))
+            { }
+            this.payloadPartFinishedListenerList.add(payloadPartFinishedListener);
+        }
+        finally
+        {
+            this.writeLockFinishListener.unlock();
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeSubStreamListener(final ISubStreamListener payloadPartFinishedListener)
+    {
+        try
+        {
+            this.writeLockFinishListener.lock();
+            if (this.payloadPartFinishedListenerList == null)
+            {
+                return;
+            }
+            while (this.payloadPartFinishedListenerList.remove(payloadPartFinishedListener))
+            { }
+        }
+        finally
+        {
+            this.writeLockFinishListener.unlock();
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IOutputStreamPartitioner setPartId(final String partId)
+    {
+        this.partId = partId;
+        return this;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getPartId()
+    {
+        return this.partId;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OutputStream createNextSubOutputStream() throws IOException
+    {
+        final OutputStream substream = this.streamPartitionerFactory.createOutputSubStream(this);
+        this.partId = UUID.randomUUID().toString();
+        return substream;
+    }
+    
+    /**
+     * Handle eventsystem of
+     * {@link org.sodeac.streampartitioner.api.ISubStreamListener}
+     */
+    public void fireSubStreamCloseEvent()
+    {
+        List<ISubStreamListener> fireList = null;
+        try
+        {
+            this.readLockFinishListener.lock();
+            if (this.payloadPartFinishedListenerList == null)
+            {
+                return;
+            }
+            if (this.payloadPartFinishedListenerList.isEmpty())
+            {
+                return;
+            }
+            fireList = new ArrayList<ISubStreamListener>();
+            fireList.addAll(this.payloadPartFinishedListenerList);
+        }
+        finally
+        {
+            this.readLockFinishListener.unlock();
+        }
+        
+        for (final ISubStreamListener payloadPartFinishedListener : fireList)
+        {
+            try
+            {
+                payloadPartFinishedListener.onClose(this);
+            }
+            catch (final Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * @return SharedLock to synchronize activities of partitioner outside of this
+     * class
+     */
+    protected ReentrantLock getLockCreate()
+    {
+        return this.lockCreate;
+    }
 }

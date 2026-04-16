@@ -1,11 +1,7 @@
 language: java
 
-sudo: false
-
 jdk:
-- oraclejdk8
+  - openjdk21
 
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
+script:
+  - mvn -B verify
